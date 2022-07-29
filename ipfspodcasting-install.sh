@@ -70,7 +70,7 @@ if [ $EUID = 0 ]; then
   if [[ ! -f "/home/$SUDO_USER/.ipfs/config" ]]; then runuser -l $SUDO_USER -c "ipfs init"; fi
 
   # Grab latest IPFS Podcasting script and make executable
-  runuser -l $SUDO_USER -c "wget -O /home/${SUDO_USER}/ipfspodcastnode.py https://ipfspodcasting.net/modules/mjc/src/ipfspodcast/ipfspodcastnode.py"
+  runuser -l $SUDO_USER -c "wget -O /home/${SUDO_USER}/ipfspodcastnode.py https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/ipfspodcastnode.py"
   runuser -l $SUDO_USER -c "chmod +x /home/${SUDO_USER}/ipfspodcastnode.py"
 
   # Create/edit crontab to run IPFS Podcasting script every 10 minutes
