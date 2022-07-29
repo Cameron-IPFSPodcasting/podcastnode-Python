@@ -22,7 +22,7 @@ if [ $EUID = 0 ]; then
   done  
 
   # Install wget, python3, pip, requests (if required)
-  if [ $(crontab -l &> /dev/null; echo $?) != 0 ]; then 
+  if [ $(which crontab &> /dev/null; echo $?) != 0 ]; then 
     # Ugh, cron is not installed on a minimal Ubuntu server
     echo 'Installing cron...'
     DEBIAN_FRONTEND=noninteractive apt-get -y -qq install cron
