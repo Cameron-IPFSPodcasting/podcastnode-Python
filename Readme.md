@@ -32,4 +32,4 @@ You can [view participating nodes](https://ipfspodcasting.net/PodSwarm) to find 
 
 ## Troubleshooting & Support
 
-For support, you can email <support@ipfspodcasting.net>, submit an issue at the [github page](https://github.com/Cameron-IPFSPodcasting/podcastnode-Python/issues), or ask for help to [@Cameron](https://podcastindex.social/@cameron) on Mastodon [@podcastindex.social](https://podcastindex.social/).
+For support, you can email <support@ipfspodcasting.net>, submit an issue at the [GitHub page](https://github.com/Cameron-IPFSPodcasting/podcastnode-Python/issues), or ask for help to [@Cameron](https://podcastindex.social/@cameron) on Mastodon [@podcastindex.social](https://podcastindex.social/).
