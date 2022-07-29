@@ -8,7 +8,7 @@ The python script can be manually installed & run on an existing IPFS server, or
 
 If you already have an IPFS server, you only need to run a client script every 10 minutes (via cron) to request & process podcast episodes.
 
-1. [Download the client script](https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/ipfspodcastnode.py").
+1. [Download the client script](https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/ipfspodcastnode.py).
 
 2. Create a cron task to run the script every 10 minutes using flock to prevent multiple instances. You may optionally include your email address in the cron task to [manage your node](https://ipfspodcasting.net/Manage) from the website.
 
