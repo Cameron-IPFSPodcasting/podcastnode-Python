@@ -317,7 +317,7 @@ cd ~
 # The following github link was found at the IPFS Podcasting site below.
 # Part of the steps
 # In the "Install Script" Section under the "Advanced" (Tux the Penguin Icon) + (IPFS logo)
-# https://ipfspodcasting.com/RunNode/Advanced
+# https://ipfspodcasting.net/RunNode/Advanced
 
 # Setting text color to bright white
 
@@ -367,7 +367,7 @@ echo
 echo -e "\033[1;92m"
 
 echo "Once system is up and running again, go into the IPFS Podcasting Management Page"
-echo "at https://ipfspodcasting.com/Manage and you should see the PeerID you recorded"
+echo "at https://ipfspodcasting.net/Manage and you should see the PeerID you recorded"
 echo "earler on there."
 echo 
 echo "Thank you for doing your part to expand the IPFS Podcasting Ecosystem!"
