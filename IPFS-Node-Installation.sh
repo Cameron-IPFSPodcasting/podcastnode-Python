@@ -155,15 +155,12 @@ echo
 # Setting color to bright white
 echo -e '\033[0;97m'
 
-# Take a wild guess what this next step does.  :-)  
+# Add user, if it does not exist 
 
-sudo  useradd --system -m /home/ipfs ipfs
+[[ $(id ipfs) ]] || sudo  adduser ipfs
 
-# This adds the newly created user to the sudo group to allow admin related functions if needed 
-# Which it will be when the script triggers the installation of IPFS
-
-sudo usermod -aG sudo ipfs
-
+# Add user to sudo group
+sudo adduser ipfs sudo
 
 # CREATE Systemd Service file for IPFS
 # ------
@@ -171,10 +168,8 @@ sudo usermod -aG sudo ipfs
 #
 # Note: This system service is only used to start up ipfs daemon.
 #
-# To stop it, use the following command under the ipfs user.
-# if under the "root" user, switch to the ipfs user:
-# su - ipfs 
-# ipfs shutdown
+# To stop it, use the following command:
+# sudo systemctl stop ipfs
 #
 # Source of ipfs.service file documentation and credit to:
 # https://www.maxlaumeister.com/u/run-ipfs-on-boot-ubuntu-debian/
@@ -191,13 +186,17 @@ After=network.target
 ### Uncomment the following line for custom ipfs datastore location
 # Environment=IPFS_PATH=/path/to/your/ipfs/datastore
 User=ipfs
-ExecStart=/usr/local/bin/ipfs daemon
+ExecStart=/usr/local/bin/ipfs daemon --enable-gc
+ExecStop=/usr/local/bin/ipfs shutdown
 Restart=on-failure
 
 [Install]
 WantedBy=default.target
 
 EOF'
+
+sudo systemctl daemon-reload
+sudo systemctl enable ipfs.service
 
 # ---
 
@@ -256,7 +255,7 @@ EOF'
 
 # The following should be self-explanatory. :-)
 
-sudo service fail2ban stop && sleep 5 && service fail2ban start
+sudo systemctl restart fail2ban
 
 # Enable IPFS Service file created earlier to run at startup but not starting it now
 # as it's not installed yet
@@ -299,7 +298,7 @@ echo -e '\033[0;97m'
 
 sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=10M/gi' /etc/systemd/journald.conf
 sudo sed -i 's/#MaxRetentionSec=/MaxRetentionSec=3D/gi' /etc/systemd/journald.conf
-sudo service systemd-journald restart
+sudo systemctl restart systemd-journald
 
 # Some quick house keeping with apt package manager
 
@@ -416,4 +415,4 @@ echo
 # Setting text color to bright white
 
 echo -e "\033[0;97m"
-su - ipfs
+sudo su - ipfs -s /bin/bash
