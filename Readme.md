@@ -22,6 +22,18 @@ If you don't have IPFS installed, this Install Script will install the latest IP
 
 2. Run the script with ```sudo bash ipfspodcasting-install.sh```
 
+## Cloud Hosting
+
+If you have a cloud hosted VPS/AWS server based on [Debian](https://www.debian.org/) or [Ubuntu](https://ubuntu.com/download), you can use the method provided by [@caffeinated_dnb33@noagendasocial.com](https://noagendasocial.com/@caffeinated_dnb33).
+
+This script will setup your VPS node, create an IPFS user, and use the IPFS Podcasting install script to install IPFS & setup a cron task on your server.
+
+1. [Download the install script](https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/IPFS-Node-Installation.sh). *Please take the time to read through the file to familiarize yourself with the processes involved.*
+
+2. Run the script with ```bash IPFS-Node-Installation.sh```
+
+3. Run the ```./ipfsinit.sh``` script (in the IPFS user's home directory) to complete the installation.
+
 ## Post Install
 
 An ```ipfspodcastnode.log``` log file will be created to monitor activity.
