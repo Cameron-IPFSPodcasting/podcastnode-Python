@@ -122,7 +122,7 @@ echo -e '\033[0;97m'
 # Note: the -qq option is to reduce terminal output of what's 
 # going on when the apt command runs
 
-#sudo apt update -qq && sudo apt -y -qq upgrade
+sudo apt update -qq && sudo apt -y -qq upgrade
 
 # Install the following tools to help with system administration
 #
