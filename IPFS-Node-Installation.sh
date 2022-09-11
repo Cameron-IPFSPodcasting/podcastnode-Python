@@ -317,7 +317,7 @@ cd ~
 # The following github link was found at the IPFS Podcasting site below.
 # Part of the steps
 # In the "Install Script" Section under the "Advanced" (Tux the Penguin Icon) + (IPFS logo)
-# https://ipfspodcasting.com/RunNode
+# https://ipfspodcasting.com/RunNode/Advanced
 
 # Setting text color to bright white
 
@@ -342,7 +342,7 @@ echo -e "\033[0;97m"
 sudo bash ipfspodcasting-install.sh
 
 echo
-echo -e "\033[1;92mAnd were back from the ipfspodcasting-install script!"
+echo -e "\033[1;92mAnd we are back from the ipfspodcasting-install script!"
 echo
 echo -e "\033[1;92mIf successful, the "PeerID" should be shown below."
 echo
@@ -357,7 +357,7 @@ sleep 10
 
 echo -e "\033[0;33m"
 
-echo "NOTE: If it didnt, simply re-run the script you saved. Tap the up"
+echo "NOTE: If it did not, simply re-run the script you saved. Tap the up"
 echo "arrow (e.g. for those not familiar of doing that of course) until you"
 echo "see the install script and press ENTER key.  Reboot your node after."
 echo
