@@ -35,7 +35,7 @@
 # platform you're working with, you may not be able to right-click to paste.
 # Instead, you may have to press Ctrl V after clicking into ther 
 
-sed -i "s/#Port 22/Port 2222/I" /etc/ssh/sshd_config && sudo service sshd reload && sleep 3 && sudo service sshd restart
+sed -i "s/#Port 22/Port 2222/I" /etc/ssh/sshd_config && sudo systemctl restart sshd
 
 # -- End of copy and paste section
 
@@ -157,7 +157,7 @@ echo -e '\033[0;97m'
 
 # Take a wild guess what this next step does.  :-)  
 
-sudo adduser ipfs
+sudo  useradd --system -m /home/ipfs ipfs
 
 # This adds the newly created user to the sudo group to allow admin related functions if needed 
 # Which it will be when the script triggers the installation of IPFS
