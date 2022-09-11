@@ -281,6 +281,7 @@ echo
 
 echo -e '\033[0;97m'
 sudo sysctl -w net.core.rmem_max=1200000
+sudo bash -c 'echo "net.core.rmem_max = 1200000" > /etc/sysctl.d/98-ipfs.conf'
 
 echo
 echo -e "\033[1;92mAdjusting size of system journal to 10MB and 3 day retention.."
