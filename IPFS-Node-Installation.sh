@@ -157,12 +157,12 @@ echo -e '\033[0;97m'
 
 # Take a wild guess what this next step does.  :-)  
 
-sudo adduser ipfs
+adduser ipfs
 
 # This adds the newly created user to the sudo group to allow admin related functions if needed 
 # Which it will be when the script triggers the installation of IPFS
 
-sudo usermod -aG sudo ipfs
+usermod -aG sudo ipfs
 
 
 # CREATE Systemd Service file for IPFS
@@ -182,7 +182,7 @@ sudo usermod -aG sudo ipfs
 
 # ---
 
-sudo bash -c 'cat > /etc/systemd/system/ipfs.service<< EOF
+cat > /etc/systemd/system/ipfs.service<< EOF
 [Unit]
 Description=IPFS daemon
 After=network.target
@@ -197,7 +197,7 @@ Restart=on-failure
 [Install]
 WantedBy=default.target
 
-EOF'
+EOF
 
 # ---
 
@@ -206,12 +206,12 @@ EOF'
 # Very important so you don't have to worry about setting a complex password
 # for the IPFS user
 
-sudo bash -c 'cat >> /etc/ssh/sshd_config<< EOF
+cat >> /etc/ssh/sshd_config<< EOF
 
 #Added during IPFS installation
 DenyUsers ipfs
 
-EOF'
+EOF
 
 # CREATE Fail2Ban Jail.local file with config for SSHd
 # NOTE: Feel free to adjust "maxretry"
@@ -224,7 +224,7 @@ EOF'
 # editing the filename shown below with your favorite editor.
 #
 
-sudo bash -c 'cat > /etc/fail2ban/jail.local<< EOF
+cat > /etc/fail2ban/jail.local<< EOF
 
 # DEFAULT
 
@@ -252,11 +252,11 @@ logpath = %(sshd_log)s
 backend = %(sshd_backend)s
 maxretry = 2
 
-EOF'
+EOF
 
 # The following should be self-explanatory. :-)
 
-sudo service fail2ban stop && sleep 5 && service fail2ban start
+service fail2ban stop && sleep 5 && service fail2ban start
 
 # Enable IPFS Service file created earlier to run at startup but not starting it now
 # as it's not installed yet
@@ -270,7 +270,7 @@ echo -e "\033[1;92mEnabling IPFS daemon service..."
 
 echo -e '\033[0;97m'
 
-sudo systemctl enable ipfs
+systemctl enable ipfs
 
 # Raises UDP buffer memory so IPFS daemon doesn't complain.  I looked
 
@@ -281,7 +281,7 @@ echo
 # Set textcolor to bright white
 
 echo -e '\033[0;97m'
-sudo sysctl -w net.core.rmem_max=1200000
+sysctl -w net.core.rmem_max=1200000
 
 echo
 echo -e "\033[1;92mAdjusting size of system journal to 10MB and 3 day retention.."
@@ -297,16 +297,16 @@ echo
 
 echo -e '\033[0;97m'
 
-sudo sed -i 's/#SystemMaxUse=/SystemMaxUse=10M/gi' /etc/systemd/journald.conf
-sudo sed -i 's/#MaxRetentionSec=/MaxRetentionSec=3D/gi' /etc/systemd/journald.conf
-sudo service systemd-journald restart
+sed -i 's/#SystemMaxUse=/SystemMaxUse=10M/gi' /etc/systemd/journald.conf
+sed -i 's/#MaxRetentionSec=/MaxRetentionSec=3D/gi' /etc/systemd/journald.conf
+service systemd-journald restart
 
 # Some quick house keeping with apt package manager
 
-sudo apt -qq autoremove
-sudo apt -qq clean
+apt -qq autoremove
+apt -qq clean
 
-sudo bash -c 'cat > /home/ipfs/ipfsinit.sh<< EOF
+cat > /home/ipfs/ipfsinit.sh<< EOF
 
 #!/bin/bash
 
@@ -317,11 +317,11 @@ cd ~
 # The following github link was found at the IPFS Podcasting site below.
 # Part of the steps
 # In the "Install Script" Section under the "Advanced" (Tux the Penguin Icon) + (IPFS logo)
-# https://ipfspodcasting.net/RunNode/Advanced
+# https://ipfspodcasting.com/RunNode
 
 # Setting text color to bright white
 
-echo -e "\033[0;97m"
+echo -e '\033[0;97m'
 
 wget https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/ipfspodcasting-install.sh
 
@@ -342,7 +342,7 @@ echo -e "\033[0;97m"
 sudo bash ipfspodcasting-install.sh
 
 echo
-echo -e "\033[1;92mAnd we are back from the ipfspodcasting-install script!"
+echo -e "\033[1;92mAnd we're back from the ipfspodcasting-install script!"
 echo
 echo -e "\033[1;92mIf successful, the "PeerID" should be shown below."
 echo
@@ -357,7 +357,7 @@ sleep 10
 
 echo -e "\033[0;33m"
 
-echo "NOTE: If it did not, simply re-run the script you saved. Tap the up"
+echo "NOTE: If it didn't, simply re-run the script you saved. Tap the up"
 echo "arrow (e.g. for those not familiar of doing that of course) until you"
 echo "see the install script and press ENTER key.  Reboot your node after."
 echo
@@ -367,7 +367,7 @@ echo
 echo -e "\033[1;92m"
 
 echo "Once system is up and running again, go into the IPFS Podcasting Management Page"
-echo "at https://ipfspodcasting.net/Manage and you should see the PeerID you recorded"
+echo "at https://ipfspodcasting.com/Manage and you should see the PeerID you recorded"
 echo "earler on there."
 echo 
 echo "Thank you for doing your part to expand the IPFS Podcasting Ecosystem!"
@@ -389,15 +389,15 @@ echo
 
 echo -e "\033[0;97m"
 
-EOF'
+EOF
 
 # Makes newly created file executable.  But you probably already knew that huh!?  B-)
 
-sudo chmod +x /home/ipfs/ipfsinit.sh
+chmod +x /home/ipfs/ipfsinit.sh
 
 # Sets ownership of script to ipfs user 
 
-sudo chown ipfs:ipfs /home/ipfs/ipfsinit.sh
+chown ipfs:ipfs /home/ipfs/ipfsinit.sh
 
 # Next step is to run the script so type in:
 # ./ipfsinit.sh  (and press ENTER key)
