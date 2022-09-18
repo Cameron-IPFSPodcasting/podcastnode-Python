@@ -28,6 +28,8 @@ If you have a cloud hosted VPS/AWS server based on [Debian](https://www.debian.o
 
 This script will setup your VPS node, create an IPFS user, and use the IPFS Podcasting install script to install IPFS & setup a cron task on your server.
 
+**Login as the root user before running this script with** ```sudo su```
+
 1. [Download the install script](https://raw.githubusercontent.com/Cameron-IPFSPodcasting/podcastnode-Python/main/IPFS-Node-Installation.sh). *Please take the time to read through the file to familiarize yourself with the processes involved.*
 
 2. Run the script with ```bash IPFS-Node-Installation.sh```
