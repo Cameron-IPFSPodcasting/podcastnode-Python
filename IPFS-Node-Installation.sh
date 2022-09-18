@@ -35,7 +35,11 @@
 # platform you're working with, you may not be able to right-click to paste.
 # Instead, you may have to press Ctrl V after clicking into ther 
 
-sed -i "s/#Port 22/Port 2222/I" /etc/ssh/sshd_config && sudo service sshd reload && sleep 3 && sudo service sshd restart
+# sed -i "s/#Port 22/Port 2222/I" /etc/ssh/sshd_config && sudo service sshd reload && sleep 3 && sudo service sshd restart
+
+# Change to systemctl in place of service was submitted by "suorcd"
+
+sed -i "s/#Port 22/Port 2222/I" /etc/ssh/sshd_config && systemctl sshd restart
 
 # -- End of copy and paste section
 
@@ -112,17 +116,20 @@ SSHD_PORT_NUM=2222
 clear
 
 # Set text color the light green
-
 echo -e "\033[1;92mChecking for available system updates..."
 
 # Set text color to bright white
-
 echo -e '\033[0;97m'
 
 # Note: the -qq option is to reduce terminal output of what's 
 # going on when the apt command runs
 
-sudo apt update -qq && sudo apt -y -qq upgrade
+# Adding Universe repository in the event it's not active
+# so fail2ban and related packages don't fail
+
+add-apt-repository -y universe
+
+apt update -qq && apt -y -qq upgrade
 
 # Install the following tools to help with system administration
 #
@@ -137,10 +144,9 @@ sudo apt update -qq && sudo apt -y -qq upgrade
 #
 # I kindly suggest learning about what each of these tools do and how to use them to further your admin skills
 
-sudo apt -y -qq install net-tools fail2ban tmux
+apt -y -qq install net-tools fail2ban tmux
 
 # Setting color the light green
-
 echo
 echo -e "\033[1;92mYou'll be asked to assign a password.  Afterwards, no need to fill out"
 echo -e "\033[1;92many of the other fields.  Just press ENTER key to skip through them."
@@ -163,7 +169,6 @@ adduser ipfs
 # Which it will be when the script triggers the installation of IPFS
 
 usermod -aG sudo ipfs
-
 
 # CREATE Systemd Service file for IPFS
 # ------
@@ -256,18 +261,20 @@ EOF
 
 # The following should be self-explanatory. :-)
 
-service fail2ban stop && sleep 5 && service fail2ban start
+# service fail2ban stop && sleep 5 && service fail2ban start
+
+# Change to systemctl in place of service was submitted by "suorcd"
+
+systemctl restart fail2ban
 
 # Enable IPFS Service file created earlier to run at startup but not starting it now
 # as it's not installed yet
 
 # Setting color the light green
-
 echo
 echo -e "\033[1;92mEnabling IPFS daemon service..."
 
 # Setting text color to bright white
-
 echo -e '\033[0;97m'
 
 systemctl enable ipfs
@@ -279,14 +286,17 @@ echo -e "\033[1;92mRaising UDP buffer memory so IPFS daemon doesn't complain"
 echo 
 
 # Set textcolor to bright white
-
 echo -e '\033[0;97m'
+
+# Line below was submitted by "suorcd"
+
+echo "net.core.rmem_max = 1200000" > /etc/sysctl.d/98-ipfs.conf
+
 sysctl -w net.core.rmem_max=1200000
 
 echo
 echo -e "\033[1;92mAdjusting size of system journal to 10MB and 3 day retention.."
 echo 
-
 
 # This is will limit growth of the system journal to 10MB and 3 day retention.
 # It was done default system settings had consumed almost 1GB after a few days
@@ -299,7 +309,11 @@ echo -e '\033[0;97m'
 
 sed -i 's/#SystemMaxUse=/SystemMaxUse=10M/gi' /etc/systemd/journald.conf
 sed -i 's/#MaxRetentionSec=/MaxRetentionSec=3D/gi' /etc/systemd/journald.conf
-service systemd-journald restart
+
+# service systemd-journald restart
+
+# Change to systemctl in place of service was submitted by "suorcd"
+systemctl restart systemd-journald
 
 # Some quick house keeping with apt package manager
 
@@ -416,4 +430,8 @@ echo
 # Setting text color to bright white
 
 echo -e "\033[0;97m"
-su - ipfs
+
+# Addition of "-s /bin/bash" was submitted by "suorcd"
+# su - ipfs
+
+su - ipfs -s /bin/bash
