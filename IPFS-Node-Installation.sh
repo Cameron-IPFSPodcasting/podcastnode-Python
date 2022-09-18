@@ -15,6 +15,13 @@
 # To be done via Hosted VPS Web console or whatever
 # console you're using; VM or dedicated computer. 
 
+
+# Tested on new VPS instances of Debian 11 and Ubuntu Server 20.04.5 LTS
+# It creates a user called "ipfs" with sudo privileges so the IPFS daemon doesn't run as root.
+# When IPFS node is up and running, always switch to "ipfs" user when you SSH in to work with the IPFS install.
+# Use: "su - ipfs" (For clarification: that's "su [space] - [space] ipfs" and then press ENTER key)
+
+
 # CHANGE default SSH port and restart SSHd service
 
 # For the non-initiated, which we all are at one point or
