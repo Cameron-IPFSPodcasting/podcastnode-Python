@@ -16,13 +16,25 @@ else:
   #Enter your email for support & management via IPFSPodcasting.net/Manage
   email = 'email@example.com'
 
-#Find ipfs, wget, wc
-ipfspath = shutil.which('ipfs', 0, '/usr/local/bin:/usr/bin:/bin')
-wgetpath = shutil.which('wget')
-wcpath = shutil.which('wc')
-
 #Basic logging to ipfspodcastnode.log
 logging.basicConfig(format="%(asctime)s : %(message)s", datefmt="%Y-%m-%d %H:%M:%S", filename="ipfspodcastnode.log", level=logging.INFO)
+
+#Find ipfs, wget, wc
+ipfspath = shutil.which('ipfs', 0, '/usr/local/bin:/usr/bin:/bin:' + os.environ['HOME'] + '/bin' )
+if ipfspath == None:
+  logging.error("ipfs-cli executable not found")
+  sys.exit(100)
+
+wgetpath = shutil.which('wget')
+if wgetpath == None:
+  logging.error("wget executable not found")
+  sys.exit(101)
+
+wcpath = shutil.which('wc')
+if wcpath == None:
+  logging.error("wc executable not found")
+  sys.exit(102)
+
 
 #Randomize requests so not all in the same second
 wait=random.randint(1,150)
