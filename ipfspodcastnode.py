@@ -138,16 +138,14 @@ elif work['message'][0:7] != 'No Work':
   #Report Results
   logging.info('Reporting results...')
   #Get Usage/Available
-  repostat = subprocess.run(ipfspath + ' repo stat -s|grep RepoSize', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  if repostat.returncode == 0:
-    repolen = repostat.stdout.decode().strip().split(':')
-    used = int(repolen[1].strip())
-  else:
-    used = 0
-  payload['used'] = used
-  df = os.statvfs('/')
-  payload['avail'] = df.f_bavail * df.f_frsize
-  #logging.info('Results : ' + str(payload))
+  df = shutil.disk_usage('/home/ipfs/.ipfs')
+  payload['used'] = df.used
+
+  # temporary hack
+  payload['avail'] = df.total
+
+  payload['total'] = df.total
+  logging.info('Results : ' + str(payload))
   try:
     response = requests.post("https://IPFSPodcasting.net/Response", timeout=120, data=payload)
   except requests.RequestException as e:
