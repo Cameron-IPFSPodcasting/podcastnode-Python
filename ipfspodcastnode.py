@@ -145,7 +145,8 @@ elif work['message'][0:7] != 'No Work':
   else:
     used = 0
   payload['used'] = used
-  df = os.statvfs('/')
+  ipfs_data_path = os.environ.get("IPFS_PATH", os.environ.get("HOME", "/"))
+  df = os.statvfs(ipfs_data_path)  
   payload['avail'] = df.f_bavail * df.f_frsize
   #logging.info('Results : ' + str(payload))
   try:
