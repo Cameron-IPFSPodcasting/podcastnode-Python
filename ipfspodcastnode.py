@@ -48,7 +48,7 @@ wait = random.randint(1, 150)
 logging.info("Sleeping " + str(wait) + " seconds...")
 time.sleep(wait)
 
-payload = {"email": email, "version": "0.6p"}
+payload = {"email": email, "version": "0.7p"}
 
 # Get IPFS ID
 ipid = subprocess.run(
