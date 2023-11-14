@@ -28,17 +28,17 @@ logging.basicConfig(
 ipfspath = shutil.which(
     "ipfs", 0, "/usr/local/bin:/usr/bin:/bin:" + os.environ["HOME"] + "/bin"
 )
-if ipfspath == None:
+if ipfspath is None:
     logging.error("ipfs-cli executable not found")
     sys.exit(100)
 
 wgetpath = shutil.which("wget")
-if wgetpath == None:
+if wgetpath is None:
     logging.error("wget executable not found")
     sys.exit(101)
 
 wcpath = shutil.which("wc")
-if wcpath == None:
+if wcpath is None:
     logging.error("wc executable not found")
     sys.exit(102)
 
@@ -66,7 +66,7 @@ if diag.returncode == 0:
     ipfs = json.loads(diag.stdout)
     payload["ipfs_ver"] = ipfs["ipfs_version"]
     payload["online"] = ipfs["net"]["online"]
-    if payload["online"] == False:
+    if payload["online"] is False:
         # Start the IPFS daemon
         daemon = subprocess.run(
             ipfspath + " daemon >/dev/null 2>&1 &",
