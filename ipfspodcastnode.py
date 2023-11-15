@@ -32,16 +32,10 @@ if ipfspath is None:
     logging.error("ipfs-cli executable not found")
     sys.exit(100)
 
-wgetpath = shutil.which("wget")
-if wgetpath is None:
-    logging.error("wget executable not found")
-    sys.exit(101)
-
 wcpath = shutil.which("wc")
 if wcpath is None:
     logging.error("wc executable not found")
     sys.exit(102)
-
 
 # Randomize requests so not all in the same second
 wait = random.randint(1, 150)
@@ -105,136 +99,131 @@ if work["message"] == "Request Error":
         "Error requesting work from IPFSPodcasting.net (check internet / firewall / router)."
     )
 
-elif work["message"][0:7] != "No Work":
-    if work["download"] != "" and work["filename"] != "":
-        logging.info("Downloading " + str(work["download"]))
+elif work["message"][0:7] == "No Work":
+    logging.info("No work.")
+    exit(0)
 
-        # Download any "downloads" and Add to IPFS (1hr48min timeout)
-        try:
-            hash = subprocess.run(
-                wgetpath
-                + ' -q --no-check-certificate "'
-                + work["download"]
-                + '" -O - | '
-                + ipfspath
-                + ' add -q -w --stdin-name "'
-                + work["filename"]
-                + '"',
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=6500,
-            )
-            hashcode = hash.returncode
-        except subprocess.SubprocessError as e:
-            logging.info("Error downloading/pinning episode : " + str(e))
-            # Clean up any other wget/add commands that may have spawned
-            cleanup = subprocess.run(
-                "kill `ps aux|grep -E '(ipfs ad[d]|no-check-certificat[e])'|awk '{ print $2 }'`",
-                shell=True,
+if work["download"] != "" and work["filename"] != "":
+    logging.info("Downloading " + str(work["download"]))
+    # Download any "downloads" and Add to IPFS (1hr48min timeout)
+    try:
+        response = requests.get(work["download"], stream=True, timeout=6500)
+        if response.ok:
+            hash = subprocess.Popen(
+                (ipfspath, "add", "-q", "-w", "--stdin-name", work["filename"]),
+                stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
             )
-            hashcode = 99
-
-        if hashcode == 0:
-            # Get file size (for validation)
-            downhash = hash.stdout.decode().strip().split("\n")
-            size = subprocess.run(
-                ipfspath + " cat " + downhash[0] + " | " + wcpath + " -c",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            downsize = size.stdout.decode().strip()
-            logging.info(
-                "Added to IPFS ( hash : "
-                + str(downhash[0])
-                + " length : "
-                + str(downsize)
-                + ")"
-            )
-            payload["downloaded"] = downhash[0] + "/" + downhash[1]
-            payload["length"] = downsize
+            downsize = 0
+            for chunk in response.iter_content(256 * 1024):  # download in 256kB chunks
+                downsize += len(chunk)
+                hash.stdin.write(chunk)
+            hash.stdin.close()
+            hashcode = hash.wait(timeout=6500)
+            if downsize == 0:
+                hashcode = 97
         else:
-            payload["error"] = hashcode
-
-    if work["pin"] != "":
-        # Directly pin if already in IPFS
-        logging.info("Pinning hash (" + str(work["pin"]) + ")")
-        try:
-            pin = subprocess.run(
-                ipfspath + " pin add " + work["pin"],
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                timeout=6500,
-            )
-            pincode = pin.returncode
-        except subprocess.SubprocessError as e:
-            logging.info("Error direct pinning : " + str(e))
-            # Clean up any other pin commands that may have spawned
-            cleanup = subprocess.run(
-                "kill `ps aux|grep \"ipfs pin ad[d]\"|awk '{ print $2 }'`",
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            pincode = 98
-
-        if pincode == 0:
-            # Verify Success and return full CID & Length
-            pinchk = subprocess.run(
-                ipfspath + " ls " + work["pin"],
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            )
-            if pinchk.returncode == 0:
-                hashlen = pinchk.stdout.decode().strip().split(" ")
-                payload["pinned"] = hashlen[0] + "/" + work["pin"]
-                payload["length"] = hashlen[1]
-            else:
-                payload["error"] = pinchk.returncode
-        else:
-            payload["error"] = pincode
-
-    if work["delete"] != "":
-        # Delete/unpin any expired episodes
-        logging.info("Unpinned old/expired hash (" + str(work["delete"]) + ")")
-        delete = subprocess.run(
-            ipfspath + " pin rm " + work["delete"],
+            hashcode = 97
+    except subprocess.SubprocessError as e:
+        logging.info("Error downloading/pinning episode : " + str(e))
+        # Clean up any other wget/add commands that may have spawned
+        cleanup = subprocess.run(
+            "kill `ps aux|grep -E '(ipfs ad[d]|no-check-certificat[e])'|awk '{ print $2 }'`",
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        payload["deleted"] = work["delete"]
+        hashcode = 99
 
-    # Report Results
-    logging.info("Reporting results...")
-    # Get Usage/Available
-    repostat = subprocess.run(
-        ipfspath + " repo stat -s|grep RepoSize",
+    if hashcode == 0:
+        # Get file size (for validation)
+        downhash = hash.stdout.read().decode().strip().split("\n")
+        logging.info(
+            "Added to IPFS ( hash : "
+            + str(downhash[0])
+            + " length : "
+            + str(downsize)
+            + ")"
+        )
+        payload["downloaded"] = downhash[0] + "/" + downhash[1]
+        payload["length"] = downsize
+    else:
+        payload["error"] = hashcode
+
+if work["pin"] != "":
+    # Directly pin if already in IPFS
+    logging.info("Pinning hash (" + str(work["pin"]) + ")")
+    try:
+        pin = subprocess.run(
+            ipfspath + " pin add " + work["pin"],
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=6500,
+        )
+        pincode = pin.returncode
+    except subprocess.SubprocessError as e:
+        logging.info("Error direct pinning : " + str(e))
+        # Clean up any other pin commands that may have spawned
+        cleanup = subprocess.run(
+            "kill `ps aux|grep \"ipfs pin ad[d]\"|awk '{ print $2 }'`",
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        pincode = 98
+
+    if pincode == 0:
+        # Verify Success and return full CID & Length
+        pinchk = subprocess.run(
+            ipfspath + " ls " + work["pin"],
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if pinchk.returncode == 0:
+            hashlen = pinchk.stdout.decode().strip().split(" ")
+            payload["pinned"] = hashlen[0] + "/" + work["pin"]
+            payload["length"] = hashlen[1]
+        else:
+            payload["error"] = pinchk.returncode
+    else:
+        payload["error"] = pincode
+
+if work["delete"] != "":
+    # Delete/unpin any expired episodes
+    logging.info("Unpinned old/expired hash (" + str(work["delete"]) + ")")
+    delete = subprocess.run(
+        ipfspath + " pin rm " + work["delete"],
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-    if repostat.returncode == 0:
-        repolen = repostat.stdout.decode().strip().split(":")
-        used = int(repolen[1].strip())
-    else:
-        used = 0
-    payload["used"] = used
-    ipfs_data_path = os.environ.get("IPFS_PATH", os.environ.get("HOME", "/"))
-    df = os.statvfs(ipfs_data_path)
-    payload["avail"] = df.f_bavail * df.f_frsize
-    # logging.info('Results : ' + str(payload))
-    try:
-        response = requests.post(
-            "https://IPFSPodcasting.net/Response", timeout=120, data=payload
-        )
-    except requests.RequestException as e:
-        logging.info("Error sending response : " + str(e))
+    payload["deleted"] = work["delete"]
 
+# Report Results
+logging.info("Reporting results...")
+# Get Usage/Available
+repostat = subprocess.run(
+    ipfspath + " repo stat -s|grep RepoSize",
+    shell=True,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+)
+if repostat.returncode == 0:
+    repolen = repostat.stdout.decode().strip().split(":")
+    used = int(repolen[1].strip())
 else:
-    logging.info("No work.")
+    used = 0
+payload["used"] = used
+ipfs_data_path = os.environ.get("IPFS_PATH", os.environ.get("HOME", "/"))
+df = os.statvfs(ipfs_data_path)
+payload["avail"] = df.f_bavail * df.f_frsize
+# logging.info('Results : ' + str(payload))
+try:
+    response = requests.post(
+        "https://IPFSPodcasting.net/Response", timeout=120, data=payload
+    )
+except requests.RequestException as e:
+    logging.info("Error sending response : " + str(e))
