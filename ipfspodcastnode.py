@@ -225,5 +225,9 @@ try:
     response = requests.post(
         "https://IPFSPodcasting.net/Response", timeout=120, data=payload
     )
+    responsedata = json.loads(response.text)
 except requests.RequestException as e:
     logging.info("Error sending response : " + str(e))
+    responsedata = { 'status': 'Error' }
+
+logging.info('Response data : ' + str(responsedata))
