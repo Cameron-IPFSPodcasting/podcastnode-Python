@@ -4,22 +4,31 @@ import subprocess
 import json
 import requests
 import shutil
+import argparse
 import time
 import random
 import logging
 import os
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from _types import RequestPayload, WorkRequest, ResponsePayload
 
-
-if len(sys.argv) > 1:
-    # Get email from command line
-    email = sys.argv[1]
-else:
-    # Enter your email for support & management via IPFSPodcasting.net/Manage
-    email = "email@example.com"
+argument_parser = argparse.ArgumentParser(description="IPFS Podcast Node")
+argument_parser.add_argument(
+    "email",
+    type=str,
+    help="Your email for support & management via IPFSPodcasting.net/Manage",
+)
+argument_parser.add_argument(
+    "--turbo-mode",
+    dest="turbo_mode",
+    action="store_true",
+    help="Runs until a failure occurs or there's no more work.",
+)
+parsed_arguments = argument_parser.parse_args()
+email = parsed_arguments.email
+turbo_mode_enabled = parsed_arguments.turbo_mode
 
 # Basic logging to ipfspodcastnode.log
 logging.basicConfig(
@@ -31,10 +40,12 @@ logging.basicConfig(
 
 # Find ipfs, wget, wc
 ipfspath = shutil.which(
-    "ipfs", 0, "/usr/local/bin:/usr/bin:/bin:" + os.environ["HOME"] + "/bin"
+    "ipfs",
+    0,
+    "/usr/local/bin:/usr/bin:/bin:" + os.environ["HOME"] + "/bin",
 )
 if ipfspath is None:
-    logging.error("ipfs-cli executable not found")
+    logging.error("ipfs executable not found")
     sys.exit(100)
 
 wcpath = shutil.which("wc")
@@ -218,18 +229,13 @@ def process_work(
     if work["delete"] != "":
         # Delete/unpin any expired episodes
         logging.info(f"Unpinned old/expired hash ({work['delete']})")
-        delete = subprocess.run(
+        subprocess.run(
             ipfspath + " pin rm " + work["delete"],
             shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        if delete.returncode == 0:
-            payload["deleted"] = work["delete"]
-        else:
-            logging.error(f"Error deleting hash ({work['delete']})")
-            payload["error"] = delete.returncode
-
+        payload["deleted"] = work["delete"]
     return payload
 
 
@@ -271,12 +277,16 @@ if __name__ == "__main__":
     wait = random.randint(1, 150)
     logging.info("Sleeping " + str(wait) + " seconds...")
     time.sleep(wait)
+    if turbo_mode_enabled:
+        logging.info("Turbo mode enabled, running in loop...")
 
-    payload = generate_default_payload()
-    work = request_work(payload)
-    if work is None:
-        sys.exit(0)
-    payload = process_work(payload, work)
-    status = report_result(payload)
-
-
+    while True:
+        payload = generate_default_payload()
+        work = request_work(payload)
+        if work is None:
+            break
+        payload = process_work(payload, work)
+        status = report_result(payload)
+        if not turbo_mode_enabled or status != "Success":
+            break
+        logging.info("Continuing in turbo mode...")
