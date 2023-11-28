@@ -38,7 +38,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-# Find ipfs, wget, wc
+# Find ipfs & wc
 ipfspath = shutil.which(
     "ipfs",
     0,
@@ -168,7 +168,7 @@ def process_work(
                 hashcode = 97
         except subprocess.SubprocessError as e:
             logging.info("Error downloading/pinning episode : " + str(e))
-            # Clean up any other wget/add commands that may have spawned
+            # Clean up any other "ipfs add" commands that may have spawned
             subprocess.run(
                 "kill `ps aux|grep -E '(ipfs ad[d]|no-check-certificat[e])'|awk '{ print $2 }'`",
                 shell=True,
